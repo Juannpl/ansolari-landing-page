@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Ansolari répond aux appels des garages, qualifie les demandes, propose un créneau et résume chaque échange."
+    />
+    <meta name="theme-color" content="#07110f" />
+    <title>Ansolari — L’agent vocal IA des garages</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Aller au contenu</a>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Ansolari, accueil">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span>Ansolari</span>
+      </a>
+      <a class="header-cta" href="#contact">Réserver une démo</a>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy reveal">
+          <div class="eyebrow"><span></span> Agent vocal IA pour garages automobiles</div>
+          <h1>Ne laissez plus un appel devenir un client perdu.</h1>
+          <p class="hero-lead">
+            Ansolari décroche, comprend la demande, propose un rendez-vous et vous
+            transmet un résumé clair — même quand l’atelier est déjà à plein régime.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#demo">
+              Simuler un appel
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+            </a>
+            <a class="button button-ghost" href="#contact">Voir une démo de 15 min</a>
+          </div>
+          <div class="trust-row" aria-label="Avantages clés">
+            <div><strong>24/7</strong><span>Accueil continu</span></div>
+            <div><strong>&lt; 2 s</strong><span>Décrochage</span></div>
+            <div><strong>1 résumé</strong><span>Après chaque appel</span></div>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal" aria-label="Aperçu d’un appel traité par Ansolari">
+          <div class="ambient ambient-one"></div>
+          <div class="ambient ambient-two"></div>
+          <article class="call-card">
+            <div class="call-topline">
+              <span class="live-dot"></span>
+              <span>Appel pris en charge</span>
+              <span class="call-time">00:42</span>
+            </div>
+            <div class="caller">
+              <div class="caller-avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7.7 3.5l2.2-.5 1.7 4.2-1.5 1.2c.8 1.7 2.1 3 3.8 3.8l1.2-1.5 4.2 1.7-.5 2.2c-.3 1.4-1.6 2.4-3.1 2.3C9.8 16.6 4.4 11.2 4 5.3c-.1-1.4.9-2.7 2.3-3.1l1.4-.3" /></svg>
+              </div>
+              <div>
+                <strong>Client entrant</strong>
+                <span>Révision annuelle</span>
+              </div>
+              <div class="ai-badge">IA active</div>
+            </div>
+            <div class="wave" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="mini-transcript">
+              <p><span>A</span> J’ai un créneau demain à 10 h 30. Souhaitez-vous le réserver ?</p>
+              <p class="client-line"><span>C</span> Oui, c’est parfait.</p>
+            </div>
+            <div class="appointment-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 011 1v14H4V6a1 1 0 011-1z" /></svg>
+              <div><strong>Rendez-vous confirmé</strong><span>Demain · 10 h 30 · Révision</span></div>
+              <svg class="check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l4 4L19 6" /></svg>
+            </div>
+          </article>
+          <div class="summary-float">
+            <span class="summary-icon" aria-hidden="true">✓</span>
+            <div><strong>Résumé envoyé</strong><span>Motif, véhicule, créneau</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section" id="demo">
+        <div class="section-heading reveal">
+          <div>
+            <div class="eyebrow"><span></span> Démonstration interactive</div>
+            <h2>Testez le parcours en moins d’une minute.</h2>
+          </div>
+          <p>Incarnez un client qui appelle pendant que l’équipe du garage est occupée.</p>
+        </div>
+
+        <div class="demo-shell reveal">
+          <div class="demo-phone">
+            <div class="phone-header">
+              <div>
+                <span class="phone-kicker">APPEL ENTRANT</span>
+                <strong>Garage des Lilas</strong>
+              </div>
+              <span class="demo-timer" id="demoTimer">00:00</span>
+            </div>
+
+            <div class="call-state" id="callState">
+              <div class="ring-icon" id="ringIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7.7 3.5l2.2-.5 1.7 4.2-1.5 1.2c.8 1.7 2.1 3 3.8 3.8l1.2-1.5 4.2 1.7-.5 2.2c-.3 1.4-1.6 2.4-3.1 2.3C9.8 16.6 4.4 11.2 4 5.3c-.1-1.4.9-2.7 2.3-3.1l1.4-.3" /></svg>
+              </div>
+              <strong id="stateTitle">Un client appelle…</strong>
+              <span id="stateSubtitle">Voyez comment Ansolari prend le relais.</span>
+            </div>
+
+            <div class="transcript" id="transcript" aria-live="polite"></div>
+
+            <div class="demo-controls" id="demoControls">
+              <button class="button button-primary button-full" id="startDemo" type="button">
+                <span class="phone-dot" aria-hidden="true"></span> Décrocher avec Ansolari
+              </button>
+            </div>
+          </div>
+
+          <aside class="demo-progress" aria-label="Progression de la simulation">
+            <div class="progress-top">
+              <span>Parcours de l’appel</span>
+              <button id="resetDemo" type="button" disabled>Recommencer</button>
+            </div>
+            <ol>
+              <li class="active" data-step="1"><span>1</span><div><strong>Décrochage</strong><small>Accueil immédiat et personnalisé</small></div></li>
+              <li data-step="2"><span>2</span><div><strong>Qualification</strong><small>Motif et informations du véhicule</small></div></li>
+              <li data-step="3"><span>3</span><div><strong>Disponibilités</strong><small>Créneaux compatibles avec l’agenda</small></div></li>
+              <li data-step="4"><span>4</span><div><strong>Confirmation</strong><small>Rendez-vous ajouté et client informé</small></div></li>
+              <li data-step="5"><span>5</span><div><strong>Résumé</strong><small>L’essentiel transmis à votre équipe</small></div></li>
+            </ol>
+            <div class="result-card" id="resultCard">
+              <div class="result-head"><span>RÉSUMÉ DE L’APPEL</span><span class="result-status">À venir</span></div>
+              <dl>
+                <div><dt>Motif</dt><dd id="summaryReason">—</dd></div>
+                <div><dt>Véhicule</dt><dd id="summaryVehicle">—</dd></div>
+                <div><dt>Rendez-vous</dt><dd id="summarySlot">—</dd></div>
+              </dl>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="contact-section" id="contact">
+        <div class="contact-copy reveal">
+          <div class="eyebrow eyebrow-light"><span></span> Votre accueil téléphonique, enfin disponible</div>
+          <h2>Écoutez Ansolari répondre comme votre meilleur réceptionnaire.</h2>
+          <p>
+            Une démonstration ciblée de 15 minutes suffit pour adapter le scénario à
+            vos horaires, vos prestations et votre agenda.
+          </p>
+          <ul>
+            <li><span>✓</span> Aucun changement d’outil imposé</li>
+            <li><span>✓</span> Configuration selon votre façon de travailler</li>
+            <li><span>✓</span> Vous gardez le contrôle sur chaque rendez-vous</li>
+          </ul>
+        </div>
+
+        <form class="contact-card reveal" id="demoForm">
+          <div class="form-heading">
+            <span class="form-number">15</span>
+            <div><strong>Réserver une démo</strong><span>minutes · sans engagement</span></div>
+          </div>
+          <div class="field-grid">
+            <label>
+              <span>Nom du garage</span>
+              <input name="garage" type="text" placeholder="Garage Dupont" required autocomplete="organization" />
+            </label>
+            <label>
+              <span>Votre prénom</span>
+              <input name="name" type="text" placeholder="Thomas" required autocomplete="given-name" />
+            </label>
+          </div>
+          <label>
+            <span>E-mail professionnel</span>
+            <input name="email" type="email" placeholder="thomas@garage.fr" required autocomplete="email" />
+          </label>
+          <label>
+            <span>Principal besoin</span>
+            <div class="custom-select" data-custom-select>
+              <select name="need" required tabindex="-1" aria-hidden="true">
+                <option value="">Sélectionnez un besoin</option>
+                <option>Répondre aux appels manqués</option>
+                <option>Automatiser la prise de rendez-vous</option>
+                <option>Filtrer et résumer les demandes</option>
+                <option>Voir comment l’IA s’adapte au garage</option>
+              </select>
+              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                <span>Sélectionnez un besoin</span>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
+              </button>
+              <div class="select-options" role="listbox" tabindex="-1">
+                <button type="button" role="option" data-value="Répondre aux appels manqués">Répondre aux appels manqués</button>
+                <button type="button" role="option" data-value="Automatiser la prise de rendez-vous">Automatiser la prise de rendez-vous</button>
+                <button type="button" role="option" data-value="Filtrer et résumer les demandes">Filtrer et résumer les demandes</button>
+                <button type="button" role="option" data-value="Voir comment l’IA s’adapte au garage">Voir comment l’IA s’adapte au garage</button>
+              </div>
+            </div>
+          </label>
+          <button class="button button-dark button-full" type="submit">
+            Choisir un créneau
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+          </button>
+          <p class="form-note">Version privée : aucune donnée n’est transmise ni enregistrée.</p>
+          <div class="form-success" id="formSuccess" role="status" aria-live="polite">
+            <span>✓</span>
+            <div><strong>Votre demande est prête.</strong><p>Le parcours de réservation réel sera relié avant la mise en ligne publique.</p></div>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand brand-footer" href="#top">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>Ansolari</span>
+      </a>
+      <p>Agent vocal IA conçu pour les garages automobiles.</p>
+      <span>© <span id="year"></span> Ansolari</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
