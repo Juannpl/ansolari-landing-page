@@ -48,7 +48,8 @@ test('form validates required fields and stays entirely local', async ({ page })
   await page.getByLabel('Nom du garage').fill('Garage Test');
   await page.getByLabel('Votre prénom').fill('Camille');
   await page.getByLabel('E-mail professionnel').fill('camille@example.com');
-  await page.getByLabel('Principal besoin').selectOption('Répondre aux appels manqués');
+  await page.getByRole('combobox', { name: 'Principal besoin' }).click();
+  await page.getByRole('option', { name: 'Répondre aux appels manqués' }).click();
   const requests: string[] = [];
   page.on('request', request => requests.push(request.url()));
   await page.getByRole('button', { name: 'Préparer ma demande' }).click();
