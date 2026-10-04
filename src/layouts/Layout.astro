@@ -12,6 +12,16 @@ const {
 const site = getSiteUrl();
 const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
 const socialImage = site ? new URL('/social-card.png', site).href : undefined;
+const structuredData = site && canonical ? {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'Person', '@id': `${site.href}#publisher`, name: 'Juan-Pablo LONDONO RAMIREZ', url: site.href },
+    { '@type': 'Brand', '@id': `${site.href}#ansolari`, name: 'Ansolari', url: site.href, logo: new URL('/images/logo-color.svg', site).href },
+    { '@type': 'WebSite', '@id': `${site.href}#website`, name: 'Ansolari', url: site.href, inLanguage: 'fr-FR', publisher: { '@id': `${site.href}#publisher` } },
+    { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: title, description,
+      inLanguage: 'fr-FR', isPartOf: { '@id': `${site.href}#website` }, about: { '@id': `${site.href}#ansolari` } },
+  ],
+} : undefined;
 ---
 <!doctype html>
 <html lang="fr">
@@ -36,6 +46,7 @@ const socialImage = site ? new URL('/social-card.png', site).href : undefined;
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Ansolari — Un accueil téléphonique adapté à votre garage" />
   </>}
+  {structuredData && <script type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\u003c')} />}
   <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
