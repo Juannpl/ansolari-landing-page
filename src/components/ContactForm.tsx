@@ -202,7 +202,7 @@ export default function ContactForm() {
       <div hidden><label>Ne pas remplir ce champ<input name="bot-field" tabIndex={-1} autoComplete="off" /></label></div>
       <div className="form-heading">
         <span className="form-number">15</span>
-        <div><strong>Réserver une démo</strong><span>minutes · sans engagement</span></div>
+        <div><strong>Demander une démo</strong><span>minutes · sans engagement</span></div>
       </div>
       <div className="field-grid">
         <label><span>Nom du garage</span><input name="garage" placeholder="Garage Dupont" disabled={sending || Boolean(pending)} required maxLength={120} autoComplete="organization" /></label>
@@ -264,7 +264,7 @@ export default function ContactForm() {
       <p className="form-note">Vos coordonnées servent uniquement à vous recontacter pour votre démonstration.</p>
       {sendError && <p className="need-error" role="alert">L’envoi a échoué. Réessayez ou contactez-nous à <a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a>.</p>}
       <div role="status" aria-live="polite">
-        {submitted && <div className="form-success visible"><span aria-hidden="true">✓</span><div><strong>Votre demande a bien été envoyée.</strong><p>Nous vous recontacterons pour convenir d’un créneau de démonstration.</p></div></div>}
+        {submitted && <div className="form-success visible"><span aria-hidden="true">✓</span><div><strong>Votre demande a bien été envoyée.</strong><p>Nous vous répondrons par e-mail pour convenir d’un créneau. Aucun rendez-vous n’est réservé automatiquement.</p></div></div>}
       </div>
     </form>
   );
