@@ -330,3 +330,13 @@ select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(233,154,50,.
 .form-success { color: #493522; background: #fae8c3; }
 .form-success p { color: #735b42; }
 @media (max-width: 620px) { .brand-logo { width: 33px; } }
+
+.email-verification { display: grid; gap: 12px; padding: 18px; border: 1px solid #dcc6a7; border-radius: 14px; }
+.email-verification h3, .email-verification p { margin: 0; }
+.email-verification h3 { font-size: 16px; }
+.email-verification p { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.verification-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.verification-actions button { padding: 8px; border: 1px solid #dcc6a7; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; }
+.verification-actions button:disabled { opacity: .5; cursor: default; }
+
+.captcha-field { min-width: 0; overflow-x: auto; }

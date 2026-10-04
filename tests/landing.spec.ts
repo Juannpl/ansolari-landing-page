@@ -1,5 +1,22 @@
 import { expect, test } from '@playwright/test';
 
+// Simulate the provider; never send real emails or load Google's widget in tests.
+test.beforeEach(async ({ page }) => {
+  await page.route('https://www.google.com/recaptcha/api.js**', route => route.fulfill({
+    contentType: 'application/javascript',
+    body: `window.grecaptcha = {
+      ready: callback => callback(),
+      render: (element, options) => {
+        const button = document.createElement('button');
+        button.type = 'button'; button.textContent = 'Valider le CAPTCHA de test';
+        button.onclick = () => options.callback('test-token');
+        element.appendChild(button); return 0;
+      },
+      reset: () => {}
+    };`,
+  }));
+});
+
 test('landing, navigation and complete simulated call', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -41,23 +58,82 @@ for (const resetAt of ['greeting', 'checking', 'confirming']) {
   });
 }
 
-test('form validates required fields and stays entirely local', async ({ page }) => {
-  await page.goto('/#contact');
-  await page.getByRole('button', { name: 'Préparer ma demande' }).click();
-  await expect(page.getByText('Votre demande est prête.')).toHaveCount(0);
+async function fillContact(page: import('@playwright/test').Page) {
   await page.getByLabel('Nom du garage').fill('Garage Test');
   await page.getByLabel('Votre prénom').fill('Camille');
   await page.getByLabel('E-mail professionnel').fill('camille@example.com');
   await page.getByRole('combobox', { name: 'Principal besoin' }).click();
   await page.getByRole('option', { name: 'Répondre aux appels manqués' }).click();
-  const requests: string[] = [];
-  page.on('request', request => requests.push(request.url()));
-  await page.getByRole('button', { name: 'Préparer ma demande' }).click();
-  await expect(page.getByText('Votre demande est prête.')).toBeVisible();
-  expect(requests).toEqual([]);
+}
+
+test('form validates fields and sends the complete EmailJS payload', async ({ page }) => {
+  const payloads: string[] = [];
+  await page.route('https://api.emailjs.com/api/v1.0/email/send', async route => {
+    payloads.push(route.request().postData()!);
+    await route.fulfill({ status: 200, body: 'OK' });
+  });
+  await page.goto('/#contact');
+  await page.getByRole('button', { name: 'Envoyer ma demande' }).click();
+  expect(payloads).toEqual([]);
+  await page.getByLabel('Nom du garage').fill('Garage Test');
+  await page.getByLabel('Votre prénom').fill('Camille');
+  await page.getByLabel('E-mail professionnel').fill('camille@example.com');
+  await page.getByRole('button', { name: 'Envoyer ma demande' }).click();
+  await expect(page.getByText('Sélectionnez un besoin pour continuer.')).toBeVisible();
+  expect(payloads).toEqual([]);
+  await page.getByRole('combobox', { name: 'Principal besoin' }).click();
+  await page.getByRole('option', { name: 'Répondre aux appels manqués' }).click();
+  await page.getByRole('button', { name: 'Envoyer ma demande' }).click();
+  await expect(page.getByLabel('Code de vérification')).toBeVisible();
+  await expect(page.getByText('Votre demande a bien été envoyée.')).toHaveCount(0);
+  expect(payloads).toHaveLength(1);
+  const otpPayload = JSON.parse(payloads[0]);
+  expect(otpPayload.template_params.to_email).toBe('camille@example.com');
+  expect(otpPayload.template_params['g-recaptcha-response']).toBeUndefined();
+  expect(otpPayload.template_params.otp_code).toMatch(/^[0-9]{6}$/);
+  await page.getByLabel('Code de vérification').fill(otpPayload.template_params.otp_code === '111111' ? '222222' : '111111');
+  await page.getByRole('button', { name: 'Valider le CAPTCHA de test' }).click();
+  await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  await expect(page.getByRole('alert')).toContainText('Code incorrect');
+  expect(payloads).toHaveLength(1);
+  await page.getByLabel('Code de vérification').fill(otpPayload.template_params.otp_code);
+  await page.getByRole('button', { name: 'Valider le CAPTCHA de test' }).click();
+  await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  await expect(page.getByText('Votre demande a bien été envoyée.')).toBeVisible();
+  expect(payloads).toHaveLength(2);
+  expect(JSON.parse(payloads[1])).toEqual({
+    service_id: expect.any(String), template_id: expect.any(String), user_id: expect.any(String),
+    template_params: { 'g-recaptcha-response': 'test-token', garage: 'Garage Test', name: 'Camille', email: 'camille@example.com', need: 'Répondre aux appels manqués' },
+  });
+  await expect(page.getByRole('button', { name: 'Demande envoyée' })).toBeDisabled();
   await expect(page).toHaveURL('/#contact');
   await page.getByLabel('Votre prénom').fill('Alex');
-  await expect(page.getByText('Votre demande est prête.')).toHaveCount(0);
+  await expect(page.getByText('Votre demande a bien été envoyée.')).toHaveCount(0);
+});
+
+test('failed submission preserves data and can be retried', async ({ page }) => {
+  let attempts = 0;
+  let otpCode = '';
+  await page.route('https://api.emailjs.com/api/v1.0/email/send', async route => {
+    attempts++;
+    const payload = route.request().postDataJSON();
+    if (payload.template_params.otp_code) otpCode = payload.template_params.otp_code;
+    await route.fulfill({ status: attempts === 2 ? 500 : 200, body: 'response' });
+  });
+  await page.goto('/#contact');
+  await fillContact(page);
+  await page.getByRole('button', { name: 'Envoyer ma demande' }).click();
+  await expect(page.getByLabel('Code de vérification')).toBeVisible();
+  await page.getByLabel('Code de vérification').fill(otpCode);
+  await page.getByRole('button', { name: 'Valider le CAPTCHA de test' }).click();
+  await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  await expect(page.getByRole('alert')).toContainText('L’envoi a échoué.');
+  await expect(page.getByLabel('Votre prénom')).toHaveValue('Camille');
+  await expect(page.getByText('Votre demande a bien été envoyée.')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Valider le CAPTCHA de test' }).click();
+  await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  await expect(page.getByText('Votre demande a bien été envoyée.')).toBeVisible();
+  expect(attempts).toBe(3);
 });
 
 test('static content remains readable without JavaScript', async ({ browser, baseURL }) => {
@@ -65,6 +141,34 @@ test('static content remains readable without JavaScript', async ({ browser, bas
   const page = await context.newPage();
   await page.goto(baseURL!);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Préparer ma demande' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Envoyer ma demande' })).toBeDisabled();
   await context.close();
+});
+
+test('CAPTCHA is required and OTP stops after five incorrect guesses', async ({ page }) => {
+  let requests = 0;
+  let correct = '';
+  await page.route('https://api.emailjs.com/api/v1.0/email/send', async route => {
+    requests++;
+    correct = route.request().postDataJSON().template_params.otp_code;
+    await route.fulfill({ status: 200, body: 'OK' });
+  });
+  await page.goto('/#contact');
+  await fillContact(page);
+  await page.getByRole('button', { name: 'Envoyer ma demande' }).click();
+  await expect(page.getByLabel('Code de vérification')).toBeVisible();
+  await page.getByLabel('Code de vérification').fill(correct);
+  await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  await expect(page.getByRole('alert')).toContainText('Veuillez valider le CAPTCHA');
+  expect(requests).toBe(1);
+  await page.getByLabel('Code de vérification').fill(correct === '111111' ? '222222' : '111111');
+  await page.getByRole('button', { name: 'Valider le CAPTCHA de test' }).click();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  }
+  await expect(page.getByText('Trop de tentatives. Demandez un nouveau code.')).toBeVisible();
+  await page.getByLabel('Code de vérification').fill(correct);
+  await page.getByRole('button', { name: 'Confirmer et envoyer' }).click();
+  await expect(page.getByText('Le code a expiré ou n’a pas été envoyé. Demandez-en un nouveau.')).toBeVisible();
+  expect(requests).toBe(1);
 });

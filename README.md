@@ -53,9 +53,9 @@ Les indications commerciales affichées, comme « 24/7 » et « < 2 s », prése
 - Saisie du garage, du prénom et de l’email professionnel.
 - Sélection du besoin principal avec Radix UI Select.
 - Validation des champs requis et indication des erreurs.
-- Confirmation locale « Votre demande est prête ».
+- Envoi via EmailJS, avec confirmation, état de chargement et possibilité de réessayer en cas d’erreur.
 
-Le formulaire n’envoie et ne stocke aucune donnée. Son bouton reste désactivé tant que React n’est pas chargé, pour éviter une soumission HTML involontaire.
+Les demandes sont transmises à EmailJS. Son bouton reste désactivé tant que React n’est pas chargé.
 
 ## 🛠️ Stack technique
 
@@ -97,7 +97,7 @@ npm run test:e2e    # Parcours sur ordinateur et mobile (build requis)
 - `src/layouts/Layout.astro` : document HTML, langue et métadonnées SEO.
 - `src/components/` : en-tête, hero, démonstration, contact et pied de page.
 - `src/components/CallDemo.tsx` : simulation, choix, chronomètre et résumé. Les transitions en attente sont annulées au redémarrage.
-- `src/components/ContactForm.tsx` : formulaire privé et validation native accessible.
+- `src/components/ContactForm.tsx` : formulaire EmailJS et validation accessible.
 - `src/styles/global.css` : styles, animations et adaptation aux écrans mobiles.
 - `tests/landing.spec.ts` : tests des parcours, des redémarrages et du formulaire.
 
@@ -109,7 +109,7 @@ Exécuter `npm ci` puis `npm run build` avec Node 22.19+ et publier **`dist/`** 
 
 ## Fonctionnement privé
 
-La simulation n’effectue aucun appel réel et ne crée aucun rendez-vous. Le formulaire prépare seulement un état de confirmation local : aucune requête, aucun stockage et aucune réservation réelle. Le bouton du formulaire reste désactivé tant que React n’est pas chargé pour éviter un envoi HTML involontaire. Un service de réservation devra être connecté avant ouverture publique.
+La simulation n’effectue aucun appel réel et ne crée aucun rendez-vous. Le formulaire transmet les demandes à EmailJS, sans réserver automatiquement de créneau. Le bouton du formulaire reste désactivé tant que React n’est pas chargé pour éviter un envoi HTML involontaire. Le service et le modèle d’e-mail doivent être configurés dans EmailJS.
 
 
 ## 🗂️ Structure du dépôt
@@ -125,7 +125,7 @@ ansolari-garages-private/
 │   │   ├── Demo.astro          # Section de démonstration
 │   │   ├── CallDemo.tsx        # Conversation scénarisée interactive
 │   │   ├── Contact.astro       # Section contact
-│   │   ├── ContactForm.tsx     # Formulaire local
+│   │   ├── ContactForm.tsx     # Formulaire EmailJS
 │   │   ├── SiteHeader.astro
 │   │   └── SiteFooter.astro
 │   ├── layouts/Layout.astro    # Document HTML et métadonnées
@@ -139,7 +139,7 @@ ansolari-garages-private/
 
 ## 🧪 Périmètre des tests
 
-La suite Playwright vérifie le parcours complet de la simulation, le chronomètre, les redémarrages pendant les transitions, la validation du formulaire et l’absence de requête lors de sa soumission. Elle contrôle également la lisibilité sans JavaScript et l’absence de débordement horizontal dans le parcours testé.
+La suite Playwright vérifie le parcours complet de la simulation, le chronomètre, les redémarrages pendant les transitions, la validation du formulaire et le contenu des requêtes EmailJS et la reprise après un échec (réponses simulées). Elle contrôle également la lisibilité sans JavaScript et l’absence de débordement horizontal dans le parcours testé.
 
 Pour exécuter la suite à partir d’un build à jour :
 
@@ -153,7 +153,7 @@ Playwright démarre le serveur de prévisualisation sur `http://127.0.0.1:4321`.
 
 ## 🚧 Avant une ouverture publique
 
-Le parcours de demande doit être relié à un service réel avant de pouvoir recevoir des demandes de démonstration. La simulation pourra rester illustrative, avec son avertissement visible.
+Configurer EmailJS avant de recevoir les demandes de démonstration. La simulation pourra rester illustrative, avec son avertissement visible.
 
 Le mot « private » dans le nom du dépôt ne protège pas un site publié : aucun mécanisme d’authentification n’est implémenté dans cette page. Pour limiter l’accès à une prévisualisation, la protection doit être configurée sur l’hébergement.
 
@@ -164,3 +164,55 @@ Le mot « private » dans le nom du dépôt ne protège pas un site publié : au
 **Ansolari** · Découvrir le parcours d’un appel, du premier échange au récapitulatif.
 
 </div>
+
+## Configuration EmailJS
+
+Le formulaire utilise l’API EmailJS directement depuis le navigateur et fonctionne sur tout hébergement statique. Il ne dépend pas de Netlify et ne nécessite pas de serveur supplémentaire.
+
+1. Connecter un service d’envoi dans **Email Services** sur EmailJS.
+2. Créer un modèle dans **Email Templates**, avec **To Email** fixé à `contact@ansolari.fr`, **Reply To** à `{{email}}` et un objet tel que `Demande de démonstration — {{garage}}`.
+3. Utiliser ces variables dans le contenu du modèle :
+
+```text
+Garage : {{garage}}
+Prénom : {{name}}
+E-mail : {{email}}
+Besoin : {{need}}
+```
+
+4. Copier `.env.example` vers `.env` et renseigner le Service ID, le Template ID et la Public Key. Ces trois identifiants sont publics et intégrés au site. Ne jamais y placer de clé privée ou de mot de passe SMTP.
+5. Renseigner les mêmes variables dans l’environnement de build de l’hébergeur, puis reconstruire et redéployer `dist/`. En local, redémarrer Astro après modification de `.env`.
+6. Autoriser le domaine du site dans les réglages EmailJS, puis vérifier la réception d’une demande réelle à `contact@ansolari.fr`.
+
+Sans configuration, le formulaire affiche une erreur et propose le contact par e-mail ; aucune requête n’est envoyée. Les tests navigateur simulent EmailJS et n’envoient pas de vrais e-mails. Pour les exécuter sans compte configuré, construire avec des identifiants fictifs :
+
+```sh
+PUBLIC_RECAPTCHA_SITE_KEY=test_captcha PUBLIC_EMAILJS_TEMPLATE_OTP_ID=test_otp PUBLIC_EMAILJS_SERVICE_ID=test_service PUBLIC_EMAILJS_TEMPLATE_ID=test_template PUBLIC_EMAILJS_PUBLIC_KEY=test_public npm run build
+npm run test:e2e
+```
+
+Ne pas publier ce build de test : reconstruire avec les identifiants réels avant déploiement.
+
+Documentation : https://www.emailjs.com/docs/rest-api/send/.
+
+### Vérification de l’adresse e-mail
+
+Créer un second modèle EmailJS et renseigner `PUBLIC_EMAILJS_TEMPLATE_OTP_ID` dans `.env` et dans l’environnement de build. Son destinataire doit être `{{to_email}}` (le visiteur), avec `{{otp_code}}` dans le contenu. `{{name}}` et `{{first_name}}` sont disponibles pour la salutation. Le modèle principal garde `contact@ansolari.fr` comme destinataire.
+
+Le code à six chiffres expire après dix minutes et peut être renvoyé après 60 secondes. Modifier les coordonnées annule la vérification précédente. La demande est envoyée après saisie du bon code. Comme dans le portfolio, cette vérification est effectuée dans le navigateur et peut être contournée ; une garantie côté serveur nécessite un backend.
+
+### Protection contre les abus
+
+Le formulaire exige reCAPTCHA v2 uniquement pour la demande finale, après saisie du code e-mail. Le code est envoyé sans CAPTCHA. Sans clé de site, aucun envoi n’est effectué ; le contact par e-mail reste disponible.
+
+1. Créer une clé Google reCAPTCHA v2 « Je ne suis pas un robot », avec le domaine publié et `localhost` pour les essais.
+2. Renseigner `PUBLIC_RECAPTCHA_SITE_KEY` (clé publique) dans `.env` et dans l’environnement de build.
+3. **Dans le modèle de demande finale**, ouvrir Settings, activer **Enable reCAPTCHA V2 verification** et renseigner la clé secrète Google. Dans le modèle OTP, désactiver cette option pour permettre l’envoi du code avant le CAPTCHA. Cette étape impose le CAPTCHA côté EmailJS ; le code du site seul ne protège pas les appels directs à l’API.
+4. Si disponible dans le compte EmailJS, restreindre les origines autorisées au site et aux adresses locales utilisées pour les tests.
+5. Garder le destinataire du modèle principal fixé à `contact@ansolari.fr`. Éviter les variables utilisateur insérées comme HTML brut ou comme URL dans les modèles.
+
+Les champs ont des limites de taille et sont validés avant l’envoi. Un code est invalidé après cinq erreurs. Le délai de 60 secondes et la vérification du code restent locaux, donc contournables : une vérification fiable nécessite un backend avec stockage du code, expiration et limitation des requêtes côté serveur. Le CAPTCHA réduit les abus, sans garantir l’absence totale de spam.
+
+Les tests simulent le CAPTCHA et EmailJS ; ils ne prouvent pas la configuration effective des modèles. Après activation, vérifier qu’un appel sans `g-recaptcha-response` est rejeté pour le modèle de demande finale et que le parcours réel fonctionne. Le modèle OTP peut être appelé directement sans CAPTCHA ; le délai local ne le protège pas contre les abus via l’API.
+
+Documentation : https://www.emailjs.com/docs/user-guide/adding-captcha-verification/.
