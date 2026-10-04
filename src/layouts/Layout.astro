@@ -1,19 +1,15 @@
 ---
 import "../styles/global.css";
+import { getSiteUrl } from "../lib/site";
 interface Props {
   title?: string;
   description?: string;
 }
 const {
-  title = "Ansolari — L’agent vocal IA des garages",
+  title = "Assistant téléphonique IA pour garages automobiles | Ansolari",
   description = "Découvrez Ansolari, un assistant téléphonique pour les garages : qualification des demandes, parcours de rendez-vous et démonstration personnalisée.",
 } = Astro.props;
-const configuredSite = import.meta.env.PUBLIC_SITE_URL?.trim();
-let site: URL | undefined;
-if (configuredSite) {
-  site = new URL(configuredSite);
-  if (!['https:', 'http:'].includes(site.protocol)) throw new Error('PUBLIC_SITE_URL doit être une URL HTTP(S).');
-}
+const site = getSiteUrl();
 const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
 const socialImage = site ? new URL('/social-card.png', site).href : undefined;
 ---
@@ -24,6 +20,7 @@ const socialImage = site ? new URL('/social-card.png', site).href : undefined;
   <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content={description} />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta name="theme-color" content="#E99A32" />
   <title>{title}</title>
   {canonical && <link rel="canonical" href={canonical} />}
