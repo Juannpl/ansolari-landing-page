@@ -216,3 +216,7 @@ Les champs ont des limites de taille et sont validés avant l’envoi. Un code e
 Les tests simulent le CAPTCHA et EmailJS ; ils ne prouvent pas la configuration effective des modèles. Après activation, vérifier qu’un appel sans `g-recaptcha-response` est rejeté pour le modèle de demande finale et que le parcours réel fonctionne. Le modèle OTP peut être appelé directement sans CAPTCHA ; le délai local ne le protège pas contre les abus via l’API.
 
 Documentation : https://www.emailjs.com/docs/user-guide/adding-captcha-verification/.
+
+### Aperçu des liens partagés
+
+Renseigner `PUBLIC_SITE_URL` avec l’origine publique réelle dans `.env` et l’environnement de build. Le layout ajoute alors la canonical et les URL absolues Open Graph/Twitter avec `public/social-card.png`. Sans domaine configuré, les URL ne sont pas inventées. Le sitemap sera à ajouter une fois le domaine public confirmé.

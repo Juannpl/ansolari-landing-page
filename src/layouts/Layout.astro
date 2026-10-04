@@ -1,22 +1,51 @@
 ---
 import "../styles/global.css";
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = "Ansolari — L’agent vocal IA des garages",
+  description = "Découvrez Ansolari, un assistant téléphonique pour les garages : qualification des demandes, parcours de rendez-vous et démonstration personnalisée.",
+} = Astro.props;
+const configuredSite = import.meta.env.PUBLIC_SITE_URL?.trim();
+let site: URL | undefined;
+if (configuredSite) {
+  site = new URL(configuredSite);
+  if (!['https:', 'http:'].includes(site.protocol)) throw new Error('PUBLIC_SITE_URL doit être une URL HTTP(S).');
+}
+const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
+const socialImage = site ? new URL('/social-card.png', site).href : undefined;
 ---
 <!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Ansolari répond aux appels des garages, qualifie les demandes, propose un créneau et résume chaque échange."
-    />
-    <meta name="theme-color" content="#E99A32" />
-    <title>Ansolari — L’agent vocal IA des garages</title>
-
-  </head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#E99A32" />
+  <title>{title}</title>
+  {canonical && <link rel="canonical" href={canonical} />}
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:site_name" content="Ansolari" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  {canonical && <meta property="og:url" content={canonical} />}
+  {socialImage && <>
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ansolari — Un accueil téléphonique adapté à votre garage" />
+  </>}
+  <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  {socialImage && <meta name="twitter:image" content={socialImage} />}
+</head>
 <body>
-<a class="skip-link" href="#main">Aller au contenu</a>
-<slot />
+  <a class="skip-link" href="#main">Aller au contenu</a>
+  <slot />
 </body>
 </html>
