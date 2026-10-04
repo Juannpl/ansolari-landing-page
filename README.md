@@ -220,3 +220,11 @@ Documentation : https://www.emailjs.com/docs/user-guide/adding-captcha-verificat
 ### Aperçu des liens partagés
 
 Renseigner `PUBLIC_SITE_URL` avec l’origine publique réelle dans `.env` et l’environnement de build. Le layout ajoute alors la canonical et les URL absolues Open Graph/Twitter avec `public/social-card.png`. Sans domaine configuré, les URL ne sont pas inventées. Le sitemap sera à ajouter une fois le domaine public confirmé.
+
+### En-têtes HTTP
+
+`public/_headers` est copié dans `dist/` et appliqué par l’hébergement Netlify actuel : type MIME strict, interdiction d’intégrer le site dans une iframe, politique de référent et restrictions CSP sur les objets et l’URL de base. Ce fichier n’est pas appliqué par `astro preview`. Lors d’un changement d’hébergeur, transposer ces valeurs dans sa configuration ; le formulaire EmailJS reste indépendant de Netlify.
+
+Vérifier la réponse HTTP du site publié après déploiement. La CSP ne restreint pas encore les scripts : elle conserve la compatibilité avec les scripts Astro et Google reCAPTCHA. Documentation : https://docs.netlify.com/manage/routing/headers/.
+
+Les informations nécessaires aux pages légales et aux autres ajouts sont recensées dans `docs/publication.md`.
