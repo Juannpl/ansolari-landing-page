@@ -353,3 +353,9 @@ select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(233,154,50,.
 footer { flex-wrap: wrap; padding-block: 24px; }
 .footer-contact { line-height: 1.7; }
 .footer-contact a { color: inherit; text-decoration: underline; }
+
+.faq-list article { padding: 20px; border: 1px solid #dcc6a7; border-radius: 16px; background: var(--paper); }
+.faq-list article h3 { margin: 0; font-size: 17px; line-height: 1.5; }
+
+.service-nav { margin-left: auto; font-size: 12px; }
+@media (max-width: 620px) { .service-nav { display: none; } }
