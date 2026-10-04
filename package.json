@@ -11,7 +11,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:seo": "node --test tests/seo.test.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.0",

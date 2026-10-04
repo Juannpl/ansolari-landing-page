@@ -219,7 +219,7 @@ Documentation : https://www.emailjs.com/docs/user-guide/adding-captcha-verificat
 
 ### Aperçu des liens partagés
 
-Renseigner `PUBLIC_SITE_URL` avec l’origine publique réelle dans `.env` et l’environnement de build. Le layout ajoute alors la canonical et les URL absolues Open Graph/Twitter avec `public/social-card.png`. Sans domaine configuré, les URL ne sont pas inventées. Le sitemap sera à ajouter une fois le domaine public confirmé.
+Renseigner `PUBLIC_SITE_URL` avec l’origine publique réelle dans `.env` et l’environnement de build. Le layout ajoute alors la canonical et les URL absolues Open Graph/Twitter avec `public/social-card.png`. Sans domaine configuré, les URL ne sont pas inventées. Le sitemap est généré automatiquement à partir de cette origine.
 
 ### En-têtes HTTP
 
@@ -228,3 +228,16 @@ Renseigner `PUBLIC_SITE_URL` avec l’origine publique réelle dans `.env` et l�
 Vérifier la réponse HTTP du site publié après déploiement. La CSP ne restreint pas encore les scripts : elle conserve la compatibilité avec les scripts Astro et Google reCAPTCHA. Documentation : https://docs.netlify.com/manage/routing/headers/.
 
 Les informations nécessaires aux pages légales et aux autres ajouts sont recensées dans `docs/publication.md`.
+
+### SEO et visibilité dans les moteurs IA
+
+- `PUBLIC_SITE_URL` fixe l’origine canonique, les URL Open Graph et le sitemap. Sans origine, aucun sitemap ni balisage avec une URL inventée n’est généré.
+- `/robots.txt` autorise l’exploration publique et annonce `/sitemap.xml`. Les robots de recherche IA ne sont pas bloqués spécifiquement. Cette ouverture ne distingue pas les robots d’entraînement ; modifier la politique si nécessaire.
+- Le JSON-LD décrit le site, la page, la marque du projet et son porteur. Aucun statut de société, avis, tarif, résultat client ou disponibilité produit n’est inventé.
+- Les définitions et réponses sont présentes dans le HTML statique. Le balisage ne garantit ni indexation, ni classement, ni citation par un assistant IA.
+
+Après déploiement : vérifier le domaine dans Google Search Console et Bing Webmaster Tools, soumettre le sitemap, inspecter la page et suivre les requêtes et conversions. Vérifier la canonical, les redirections entre www et sans www et l’absence de blocage par l’hébergeur. Les redirections dépendent du domaine réellement raccordé.
+
+Les gains de visibilité dépendront aussi de preuves publiques originales : démonstration audio, cas réels, documentation d’intégrations vérifiées et liens de sites pertinents. Ne pas créer de pages répétitives par ville ni de faux témoignages pour remplir le site.
+
+Vérification du build : `npm run build` puis `npm run test:seo`. Sources : https://developers.google.com/search/docs/appearance/ai-features et https://developers.google.com/search/docs/fundamentals/ai-optimization-guide.

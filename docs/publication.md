@@ -33,7 +33,7 @@ Sources : https://www.cnil.fr/fr/exemples-de-formulaire-de-collecte-de-donnees-c
 
 ## Contenu à fournir
 
-- Domaine public définitif : renseigner PUBLIC_SITE_URL avant le build ; ajouter ensuite un sitemap et le déclarer aux moteurs.
+- Domaine public définitif : renseigner PUBLIC_SITE_URL avant le build ; le sitemap est désormais généré ; le déclarer aux moteurs après déploiement.
 - Extrait audio réel, avec autorisations nécessaires, transcription et contrôle manuel de lecture. Aucun témoignage ni résultat chiffré ne doit être fabriqué.
 - Témoignage ou cas client réel quand disponible.
 - Tarifs, intégrations prises en charge et conditions de service confirmés.
