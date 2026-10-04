@@ -261,7 +261,7 @@ export default function ContactForm() {
       {formError && <p className="need-error" role="alert">{formError}</p>}
       <button className="button button-dark button-full" type="submit" disabled={!ready || !captchaSiteKey || sending || submitted || Boolean(pending && code.length !== 6)}>{sending ? 'Envoi en cours…' : submitted ? 'Demande envoyée' : pending ? 'Confirmer et envoyer' : 'Envoyer ma demande'}<span aria-hidden="true">→</span></button>
       <noscript>Activez JavaScript pour envoyer votre demande, ou écrivez à contact@ansolari.fr.</noscript>
-      <p className="form-note">Vos coordonnées servent uniquement à vous recontacter pour votre démonstration.</p>
+      <p className="form-note">Votre adresse sert à recevoir le code et notre réponse. Les e-mails sont envoyés via EmailJS ; Google reCAPTCHA protège l’envoi de la demande.</p>
       {sendError && <p className="need-error" role="alert">L’envoi a échoué. Réessayez ou contactez-nous à <a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a>.</p>}
       <div role="status" aria-live="polite">
         {submitted && <div className="form-success visible"><span aria-hidden="true">✓</span><div><strong>Votre demande a bien été envoyée.</strong><p>Nous vous répondrons par e-mail pour convenir d’un créneau. Aucun rendez-vous n’est réservé automatiquement.</p></div></div>}

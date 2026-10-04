@@ -349,3 +349,7 @@ select:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(233,154,50,.
 .faq-list a { color: var(--ink); text-decoration: underline; }
 .faq-list summary:focus-visible { outline: 3px solid var(--brand-orange); outline-offset: 6px; border-radius: 4px; }
 @media (max-width: 620px) { .faq-section { padding: 60px 20px; } }
+
+footer { flex-wrap: wrap; padding-block: 24px; }
+.footer-contact { line-height: 1.7; }
+.footer-contact a { color: inherit; text-decoration: underline; }
