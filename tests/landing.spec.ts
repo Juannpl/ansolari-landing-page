@@ -172,3 +172,25 @@ test('CAPTCHA is required and OTP stops after five incorrect guesses', async ({ 
   await expect(page.getByText('Le code a expiré ou n’a pas été envoyé. Demandez-en un nouveau.')).toBeVisible();
   expect(requests).toBe(1);
 });
+
+test('FAQ works with the keyboard and CAPTCHA loads only after six digits', async ({ page }) => {
+  const googleRequests: string[] = [];
+  page.on('request', request => {
+    if (request.url().startsWith('https://www.google.com/recaptcha/')) googleRequests.push(request.url());
+  });
+  await page.route('https://api.emailjs.com/api/v1.0/email/send', route => route.fulfill({ status: 200, body: 'OK' }));
+  await page.goto('/');
+  const question = page.locator('summary').filter({ hasText: 'La simulation effectue-t-elle un véritable appel ?' });
+  await question.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Non. Le parcours interactif utilise des réponses et des créneaux fictifs.')).toBeVisible();
+  expect(googleRequests).toEqual([]);
+  await fillContact(page);
+  await page.getByRole('button', { name: 'Envoyer ma demande' }).click();
+  await expect(page.getByLabel('Code de vérification')).toBeVisible();
+  await page.getByLabel('Code de vérification').fill('12345');
+  expect(googleRequests).toEqual([]);
+  await page.getByLabel('Code de vérification').fill('123456');
+  await expect(page.getByRole('button', { name: 'Valider le CAPTCHA de test' })).toBeVisible();
+  expect(googleRequests).toHaveLength(1);
+});

@@ -46,7 +46,7 @@ export default function ContactForm() {
   const captchaWidget = useRef<number | null>(null);
   const captchaApi = useRef<CaptchaApi | null>(null);
   useEffect(() => {
-    if (!captchaSiteKey) return;
+    if (!captchaSiteKey || !pending || code.length !== 6 || captchaWidget.current !== null) return;
     let cancelled = false;
     const initialize = () => {
       const api = (window as Window & { grecaptcha?: CaptchaApi }).grecaptcha;
@@ -79,7 +79,7 @@ export default function ContactForm() {
       script?.removeEventListener('load', initialize);
       script?.removeEventListener('error', failed);
     };
-  }, []);
+  }, [pending, code]);
   function resetCaptcha() {
     setCaptchaToken('');
     if (captchaApi.current && captchaWidget.current !== null) captchaApi.current.reset(captchaWidget.current);
