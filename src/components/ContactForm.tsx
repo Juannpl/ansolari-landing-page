@@ -1,3 +1,4 @@
+import { translator, type Locale } from "../lib/i18n";
 import * as Select from '@radix-ui/react-select';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 
@@ -15,14 +16,16 @@ type CaptchaApi = {
   reset: (id: number) => void;
 };
 
-const needs = [
-  'Répondre aux appels manqués',
-  'Automatiser la prise de rendez-vous',
-  'Filtrer et résumer les demandes',
-  'Voir comment l’IA s’adapte au garage',
-];
 
-export default function ContactForm() {
+
+export default function ContactForm({ lang = "fr" }: { lang?: Locale }) {
+  const t = translator(lang);
+  const needs = [
+  t("Répondre aux appels manqués"),
+  t("Automatiser la prise de rendez-vous"),
+  t("Filtrer et résumer les demandes"),
+  t("Voir comment l’IA s’adapte au garage"),
+];
   const [need, setNeed] = useState('');
   const [needError, setNeedError] = useState(false);
   const needTrigger = useRef<HTMLButtonElement>(null);
@@ -57,16 +60,16 @@ export default function ContactForm() {
           sitekey: captchaSiteKey,
           callback: (token: string) => { setCaptchaToken(token); setCaptchaError(''); },
           'expired-callback': () => setCaptchaToken(''),
-          'error-callback': () => { setCaptchaToken(''); setCaptchaError('Le CAPTCHA est indisponible. Rechargez la page.'); },
+          'error-callback': () => { setCaptchaToken(''); setCaptchaError(t("Le CAPTCHA est indisponible. Rechargez la page.")); },
         });
       });
     };
     let script = document.getElementById('contact-recaptcha-script') as HTMLScriptElement | null;
-    const failed = () => setCaptchaError('Le CAPTCHA n’a pas pu être chargé. Rechargez la page ou contactez-nous par e-mail.');
+    const failed = () => setCaptchaError(t("Le CAPTCHA n’a pas pu être chargé. Rechargez la page ou contactez-nous par e-mail."));
     if (!script) {
       script = document.createElement('script');
       script.id = 'contact-recaptcha-script';
-      script.src = 'https://www.google.com/recaptcha/api.js?render=explicit&hl=fr';
+      script.src = `https://www.google.com/recaptcha/api.js?render=explicit&hl=${lang}`;
       script.async = true;
       script.defer = true;
       script.addEventListener('load', initialize);
@@ -79,7 +82,7 @@ export default function ContactForm() {
       script?.removeEventListener('load', initialize);
       script?.removeEventListener('error', failed);
     };
-  }, [pending, code]);
+  }, [pending, code, lang]);
   function resetCaptcha() {
     setCaptchaToken('');
     if (captchaApi.current && captchaWidget.current !== null) captchaApi.current.reset(captchaWidget.current);
@@ -103,7 +106,7 @@ export default function ContactForm() {
 
   async function sendCode(params: NonNullable<typeof pending>) {
     if (inFlight.current) return;
-    if (Date.now() < resendAt.current) { setCodeError('Veuillez patienter avant de demander un nouveau code.'); return; }
+    if (Date.now() < resendAt.current) { setCodeError(t("Veuillez patienter avant de demander un nouveau code.")); return; }
     inFlight.current = true;
     setSending(true);
     setCodeError('');
@@ -123,7 +126,7 @@ export default function ContactForm() {
       otp.current = { code: generated, expires: Date.now() + 10 * 60 * 1000 };
     } catch (error) {
       console.error('[ContactForm] Échec de l’envoi du code', error);
-      setCodeError('Impossible d’envoyer le code. Vérifiez votre adresse et réessayez.');
+      setCodeError(t("Impossible d’envoyer le code. Vérifiez votre adresse et réessayez."));
     } finally {
       resetCaptcha();
       inFlight.current = false;
@@ -136,18 +139,18 @@ export default function ContactForm() {
     if (inFlight.current || submitted) return;
     if (pending) {
       if (!otp.current || Date.now() >= otp.current.expires) {
-        setCodeError('Le code a expiré ou n’a pas été envoyé. Demandez-en un nouveau.');
+        setCodeError(t("Le code a expiré ou n’a pas été envoyé. Demandez-en un nouveau."));
         return;
       }
       if (code !== otp.current.code) {
         attempts.current++;
         if (attempts.current >= 5) {
           otp.current = null;
-          setCodeError('Trop de tentatives. Demandez un nouveau code.');
-        } else setCodeError('Code incorrect. Vérifiez votre e-mail.');
+          setCodeError(t("Trop de tentatives. Demandez un nouveau code."));
+        } else setCodeError(t("Code incorrect. Vérifiez votre e-mail."));
         return;
       }
-      if (!captchaToken) { setCaptchaError('Veuillez valider le CAPTCHA avant l’envoi.'); return; }
+      if (!captchaToken) { setCaptchaError(t("Veuillez valider le CAPTCHA avant l’envoi.")); return; }
       inFlight.current = true;
       setSending(true);
       setCodeError('');
@@ -188,10 +191,10 @@ export default function ContactForm() {
     if (!params.garage || params.garage.length > 120 || !params.name || params.name.length > 80 ||
       params.email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(params.email) ||
       /[\u0000-\u001f\u007f<>]/.test(params.garage + params.name) || !needs.includes(params.need)) {
-      setFormError('Vérifiez vos coordonnées : les champs ne doivent pas être vides ni contenir de balises.');
+      setFormError(t("Vérifiez vos coordonnées : les champs ne doivent pas être vides ni contenir de balises."));
       return;
     }
-    if (Date.now() < resendAt.current) { setFormError('Veuillez patienter une minute avant une nouvelle demande de code.'); return; }
+    if (Date.now() < resendAt.current) { setFormError(t("Veuillez patienter une minute avant une nouvelle demande de code.")); return; }
     setFormError('');
     setPending(params);
     await sendCode(params);
@@ -199,33 +202,33 @@ export default function ContactForm() {
   return (
     <form className="contact-card reveal" name="demo-request" method="POST"
       aria-busy={sending} onSubmit={submit} onChange={() => { setSubmitted(false); setSendError(false); }}>
-      <div hidden><label>Ne pas remplir ce champ<input name="bot-field" tabIndex={-1} autoComplete="off" /></label></div>
+      <div hidden><label>{t("Ne pas remplir ce champ")}<input name="bot-field" tabIndex={-1} autoComplete="off" /></label></div>
       <div className="form-heading">
         <span className="form-number">15</span>
-        <div><strong>Demander une démo</strong><span>minutes · sans engagement</span></div>
+        <div><strong>{t("Demander une démo")}</strong><span>{t("minutes · sans engagement")}</span></div>
       </div>
       <div className="field-grid">
-        <label><span>Nom du garage</span><input name="garage" placeholder="Garage Dupont" disabled={sending || Boolean(pending)} required maxLength={120} autoComplete="organization" /></label>
-        <label><span>Votre prénom</span><input name="name" placeholder="Thomas" disabled={sending || Boolean(pending)} required maxLength={80} autoComplete="given-name" /></label>
+        <label><span>{t("Nom du garage")}</span><input name="garage" placeholder={t("Garage Dupont")} disabled={sending || Boolean(pending)} required maxLength={120} autoComplete="organization" /></label>
+        <label><span>{t("Votre prénom")}</span><input name="name" placeholder="Thomas" disabled={sending || Boolean(pending)} required maxLength={80} autoComplete="given-name" /></label>
       </div>
-      <label><span>E-mail professionnel</span><input name="email" type="email" placeholder="thomas@garage.fr" disabled={sending || Boolean(pending)} required maxLength={254} autoComplete="email" /></label>
+      <label><span>{t("E-mail professionnel")}</span><input name="email" type="email" placeholder="thomas@garage.fr" disabled={sending || Boolean(pending)} required maxLength={254} autoComplete="email" /></label>
       <div className="need-field">
-        <label htmlFor="contact-need" id="contact-need-label">Principal besoin</label>
+        <label htmlFor="contact-need" id="contact-need-label">{t("Principal besoin")}</label>
         <Select.Root name="need" value={need} onValueChange={value => {
           setNeed(value); setNeedError(false); setSubmitted(false); setSendError(false);
         }}>
           <Select.Trigger id="contact-need" ref={needTrigger} className="need-trigger"
             disabled={!ready || sending || Boolean(pending)} aria-labelledby="contact-need-label" aria-required="true"
             aria-invalid={needError || undefined} aria-describedby={needError ? 'need-error' : undefined}>
-            <Select.Value placeholder="Sélectionnez un besoin" />
+            <Select.Value placeholder={t("Sélectionnez un besoin")} />
             <Select.Icon className="need-chevron"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg></Select.Icon>
           </Select.Trigger>
           <Select.Portal>
             <Select.Content className="need-menu" position="popper" sideOffset={8} collisionPadding={16}>
-              <Select.ScrollUpButton className="need-scroll" aria-label="Défiler vers le haut">⌃</Select.ScrollUpButton>
+              <Select.ScrollUpButton className="need-scroll" aria-label={t("Défiler vers le haut")}>⌃</Select.ScrollUpButton>
               <Select.Viewport className="need-options">
                 <Select.Group>
-                  <Select.Label className="need-menu-label">COMMENT POUVONS-NOUS VOUS AIDER ?</Select.Label>
+                  <Select.Label className="need-menu-label">{t("COMMENT POUVONS-NOUS VOUS AIDER ?")}</Select.Label>
                   {needs.map((item, index) => <Select.Item className="need-option" value={item} key={item}>
                     <span className="need-option-number" aria-hidden="true">0{index + 1}</span>
                     <Select.ItemText>{item}</Select.ItemText>
@@ -233,38 +236,38 @@ export default function ContactForm() {
                   </Select.Item>)}
                 </Select.Group>
               </Select.Viewport>
-              <Select.ScrollDownButton className="need-scroll" aria-label="Défiler vers le bas">⌄</Select.ScrollDownButton>
+              <Select.ScrollDownButton className="need-scroll" aria-label={t("Défiler vers le bas")}>⌄</Select.ScrollDownButton>
             </Select.Content>
           </Select.Portal>
         </Select.Root>
-        {needError && <p className="need-error" id="need-error" role="alert">Sélectionnez un besoin pour continuer.</p>}
+        {needError && <p className="need-error" id="need-error" role="alert">{t("Sélectionnez un besoin pour continuer.")}</p>}
       </div>
       {pending && <section className="email-verification" aria-labelledby="verification-title">
-        <h3 id="verification-title">Vérifiez votre e-mail</h3>
-        <p role="status">{sending ? 'Envoi en cours…' : otp.current ? `Un code a été envoyé à ${pending.email}.` : 'Demandez un code pour vérifier votre adresse.'}</p>
-        <label><span>Code de vérification</span><input autoFocus type="text" inputMode="numeric" autoComplete="one-time-code"
+        <h3 id="verification-title">{t("Vérifiez votre e-mail")}</h3>
+        <p role="status">{sending ? t("Envoi en cours…") : otp.current ? (lang === "en" ? `A code has been sent to ${pending.email}.` : `Un code a été envoyé à ${pending.email}.`) : t("Demandez un code pour vérifier votre adresse.")}</p>
+        <label><span>{t("Code de vérification")}</span><input autoFocus type="text" inputMode="numeric" autoComplete="one-time-code"
           value={code} maxLength={6} pattern="[0-9]{6}" required disabled={sending}
           aria-invalid={Boolean(codeError)} aria-describedby={codeError ? 'code-error' : 'code-help'}
           onChange={event => { setCode(event.target.value.replace(/\D/g, '')); setCodeError(''); }} /></label>
-        <p id="code-help">Code valable 10 minutes. Pensez à vérifier vos spams.</p>
+        <p id="code-help">{t("Code valable 10 minutes. Pensez à vérifier vos spams.")}</p>
         {codeError && <p id="code-error" className="need-error" role="alert">{codeError}</p>}
         <div className="verification-actions">
-          <button type="button" disabled={sending || cooldown > 0} onClick={() => sendCode(pending)}>{cooldown > 0 ? `Renvoyer dans ${cooldown} s` : 'Renvoyer le code'}</button>
-          <button type="button" disabled={sending} onClick={() => { setPending(null); otp.current = null; setCode(''); setCodeError(''); setSendError(false); }}>Modifier mes coordonnées</button>
+          <button type="button" disabled={sending || cooldown > 0} onClick={() => sendCode(pending)}>{cooldown > 0 ? (lang === "en" ? `Resend in ${cooldown} s` : `Renvoyer dans ${cooldown} s`) : t("Renvoyer le code")}</button>
+          <button type="button" disabled={sending} onClick={() => { setPending(null); otp.current = null; setCode(''); setCodeError(''); setSendError(false); }}>{t("Modifier mes coordonnées")}</button>
         </div>
       </section>}
       <div className="captcha-field">
         <div hidden={!pending || code.length !== 6}><div ref={captchaContainer} /></div>
-        {!captchaSiteKey && <p className="need-error" role="alert">Le formulaire est temporairement indisponible. Contactez-nous à <a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a>.</p>}
+        {!captchaSiteKey && <p className="need-error" role="alert">{t("Le formulaire est temporairement indisponible. Contactez-nous à")}{" "}<a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a>.</p>}
         {captchaError && <p className="need-error" role="alert">{captchaError}</p>}
       </div>
       {formError && <p className="need-error" role="alert">{formError}</p>}
-      <button className="button button-dark button-full" type="submit" disabled={!ready || !captchaSiteKey || sending || submitted || Boolean(pending && code.length !== 6)}>{sending ? 'Envoi en cours…' : submitted ? 'Demande envoyée' : pending ? 'Confirmer et envoyer' : 'Envoyer ma demande'}<span aria-hidden="true">→</span></button>
-      <noscript>Activez JavaScript pour envoyer votre demande, ou écrivez à contact@ansolari.fr.</noscript>
-      <p className="form-note">Votre adresse sert à recevoir le code et notre réponse. Les e-mails sont envoyés via EmailJS ; Google reCAPTCHA protège l’envoi de la demande.</p>
-      {sendError && <p className="need-error" role="alert">L’envoi a échoué. Réessayez ou contactez-nous à <a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a>.</p>}
+      <button className="button button-dark button-full" type="submit" disabled={!ready || !captchaSiteKey || sending || submitted || Boolean(pending && code.length !== 6)}>{sending ? t("Envoi en cours…") : submitted ? t("Demande envoyée") : pending ? t("Confirmer et envoyer") : t("Envoyer ma demande")}</button>
+      <noscript>{t("Activez JavaScript pour envoyer votre demande, ou écrivez à contact@ansolari.fr.")}</noscript>
+      <p className="form-note">{t("Votre adresse sert à recevoir le code et notre réponse. Les e-mails sont envoyés via EmailJS ; Google reCAPTCHA protège l’envoi de la demande.")}</p>
+      {sendError && <p className="need-error" role="alert">{t("L’envoi a échoué. Réessayez ou contactez-nous à")}{" "}<a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a>.</p>}
       <div role="status" aria-live="polite">
-        {submitted && <div className="form-success visible"><span aria-hidden="true">✓</span><div><strong>Votre demande a bien été envoyée.</strong><p>Nous vous répondrons par e-mail pour convenir d’un créneau. Aucun rendez-vous n’est réservé automatiquement.</p></div></div>}
+        {submitted && <div className="form-success visible"><span aria-hidden="true">✓</span><div><strong>{t("Votre demande a bien été envoyée.")}</strong><p>{t("Nous vous répondrons par e-mail pour convenir d’un créneau. Aucun rendez-vous n’est réservé automatiquement.")}</p></div></div>}
       </div>
     </form>
   );

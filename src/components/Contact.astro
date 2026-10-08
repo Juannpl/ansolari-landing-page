@@ -1,20 +1,22 @@
 ---
 import ContactForm from "./ContactForm";
+
+import { translator, type Locale } from "../lib/i18n";
+interface Props { lang?: Locale; }
+const { lang = "fr" } = Astro.props;
+const t = translator(lang);
 ---
 <section class="contact-section" id="contact">
         <div class="contact-copy reveal">
-          <div class="eyebrow eyebrow-light"><span></span> Un accueil adapté à votre garage</div>
-          <h2>Découvrez comment Ansolari peut accueillir vos clients.</h2>
-          <p>
-            Une démonstration de 15 minutes permet d’étudier le scénario adapté à
-            vos horaires, vos prestations et votre agenda.
-          </p>
+          <div class="eyebrow eyebrow-light">{t("Un accueil adapté à votre garage")}</div>
+          <h2>{t("Découvrez comment Ansolari peut accueillir vos clients.")}</h2>
+          <p>{t("Une démonstration de 15 minutes permet d’étudier le scénario adapté à vos horaires, vos prestations et votre agenda.")}</p>
           <ul>
-            <li><span>✓</span> Compatibilité avec vos outils étudiée ensemble</li>
-            <li><span>✓</span> Configuration selon votre façon de travailler</li>
-            <li><span>✓</span> Règles de prise de rendez-vous définies avec vous</li>
+            <li><span>✓</span>{t("Compatibilité avec vos outils étudiée ensemble")}</li>
+            <li><span>✓</span>{t("Configuration selon votre façon de travailler")}</li>
+            <li><span>✓</span>{t("Règles de prise de rendez-vous définies avec vous")}</li>
           </ul>
         </div>
 
-        <ContactForm client:load />
+        <ContactForm lang={lang} client:load />
       </section>

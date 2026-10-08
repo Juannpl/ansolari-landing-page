@@ -1,8 +1,18 @@
+---
+import { translator, type Locale } from "../lib/i18n";
+interface Props { lang?: Locale; }
+const { lang = "fr" } = Astro.props;
+const t = translator(lang);
+---
 <header class="site-header">
-      <a class="brand" href="#top" aria-label="Ansolari, accueil">
+      <a class="brand" href="#top" aria-label={t("Ansolari, accueil")}>
         <img class="brand-logo" src="/images/logo-color.svg" alt="" width="55" height="46" />
         <span>Ansolari</span>
       </a>
-      <a href="#fonctionnement" class="service-nav">Comprendre Ansolari</a>
-      <a class="header-cta" href="#contact">Demander une démo</a>
+      <a href="#fonctionnement" class="service-nav">{t("Comprendre Ansolari")}</a>
+      <nav class="language-switch" aria-label={lang === 'en' ? 'Language' : 'Langue'}>
+        <a href="/" lang="fr" aria-current={lang === 'fr' ? 'page' : undefined}>FR</a>
+        <a href="/en/" lang="en" aria-current={lang === 'en' ? 'page' : undefined}>EN</a>
+      </nav>
+      <a class="header-cta" href="#contact">{t("Demander une démo")}</a>
     </header>

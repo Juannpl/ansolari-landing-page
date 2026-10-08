@@ -1,14 +1,19 @@
 ---
 import CallDemo from "./CallDemo";
+
+import { translator, type Locale } from "../lib/i18n";
+interface Props { lang?: Locale; }
+const { lang = "fr" } = Astro.props;
+const t = translator(lang);
 ---
 <section class="demo-section" id="demo">
         <div class="section-heading reveal">
           <div>
-            <div class="eyebrow"><span></span> Démonstration interactive</div>
-            <h2>Testez le parcours en moins d’une minute.</h2>
+            <div class="eyebrow">{t("Démonstration interactive")}</div>
+            <h2>{t("Testez le parcours en moins d’une minute.")}</h2>
           </div>
-          <p>Incarnez un client qui appelle pendant que l’équipe du garage est occupée.</p>
+          <p>{t("Incarnez un client qui appelle pendant que l’équipe du garage est occupée.")}</p>
         </div>
-<CallDemo client:load />
-<noscript><p>Activez JavaScript pour utiliser la simulation interactive.</p></noscript>
+<CallDemo lang={lang} client:load />
+<noscript><p>{t("Activez JavaScript pour utiliser la simulation interactive.")}</p></noscript>
 </section>

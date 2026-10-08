@@ -1,15 +1,58 @@
+---
+import { translator, type Locale } from "../lib/i18n";
+interface Props { lang?: Locale; }
+const { lang = "fr" } = Astro.props;
+const t = translator(lang);
+---
 <section class="faq-section" id="questions" aria-labelledby="faq-title">
   <div class="section-heading">
-    <div><div class="eyebrow"><span></span> Vos questions</div><h2 id="faq-title">Avant de demander une démo.</h2></div>
-    <p>Les points que nous étudierons avec vous pour votre garage.</p>
+    <div><div class="eyebrow">{t("Vos questions")}</div><h2 id="faq-title">{t("Avant de demander une démo.")}</h2></div>
+    <p>{t("Les points que nous étudierons avec vous pour votre garage.")}</p>
   </div>
   <div class="faq-list">
-    <details><summary>La simulation effectue-t-elle un véritable appel ?</summary><p>Non. Le parcours interactif utilise des réponses et des créneaux fictifs. Aucun appel ni rendez-vous réel n’est créé.</p></details>
-    <details><summary>Que se passe-t-il après ma demande de démonstration ?</summary><p>Vous recevez un code pour vérifier votre adresse e-mail. Après confirmation et validation du CAPTCHA, votre demande nous est envoyée. Nous vous répondrons par e-mail pour convenir d’un créneau de 15 minutes.</p></details>
-    <details><summary>Puis-je conserver mon numéro et mon agenda ?</summary><p>Indiquez-nous votre installation téléphonique et l’agenda que vous utilisez. Leur compatibilité et les éventuels changements nécessaires seront étudiés pendant la démonstration.</p></details>
-    <details><summary>Comment sont définis les horaires et les rendez-vous ?</summary><p>La démonstration permet de discuter de vos horaires, prestations et règles de réservation. Les créneaux de la simulation sont des exemples et ne représentent pas votre agenda.</p></details>
-    <details><summary>Et si une demande nécessite une intervention humaine ?</summary><p>Précisez les situations à transmettre à votre équipe, notamment les demandes urgentes ou inhabituelles. Nous étudierons avec vous les règles et les possibilités de transfert.</p></details>
-    <details><summary>Où obtenir les tarifs et les conditions ?</summary><p>Contactez-nous à <a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a> ou demandez une démonstration pour présenter vos besoins et échanger sur les conditions proposées.</p></details>
+    <details><summary>{t("La simulation effectue-t-elle un véritable appel ?")}</summary><p>{t("Non. Le parcours interactif utilise des réponses et des créneaux fictifs. Aucun appel ni rendez-vous réel n’est créé.")}</p></details>
+    <details><summary>{t("Que se passe-t-il après ma demande de démonstration ?")}</summary><p>{t("Vous recevez un code pour vérifier votre adresse e-mail. Après confirmation et validation du CAPTCHA, votre demande nous est envoyée. Nous vous répondrons par e-mail pour convenir d’un créneau de 15 minutes.")}</p></details>
+    <details><summary>{t("Puis-je conserver mon numéro et mon agenda ?")}</summary><p>{t("Indiquez-nous votre installation téléphonique et l’agenda que vous utilisez. Leur compatibilité et les éventuels changements nécessaires seront étudiés pendant la démonstration.")}</p></details>
+    <details><summary>{t("Comment sont définis les horaires et les rendez-vous ?")}</summary><p>{t("La démonstration permet de discuter de vos horaires, prestations et règles de réservation. Les créneaux de la simulation sont des exemples et ne représentent pas votre agenda.")}</p></details>
+    <details><summary>{t("Et si une demande nécessite une intervention humaine ?")}</summary><p>{t("Précisez les situations à transmettre à votre équipe, notamment les demandes urgentes ou inhabituelles. Nous étudierons avec vous les règles et les possibilités de transfert.")}</p></details>
+    <details><summary>{t("Où obtenir les tarifs et les conditions ?")}</summary><p>{t("Contactez-nous à")} <a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a> {t("ou demandez une démonstration pour présenter vos besoins et échanger sur les conditions proposées.")}</p></details>
   </div>
-  <a class="button button-dark" href="#contact">Demander une démo <span aria-hidden="true">→</span></a>
+  <a class="button button-dark" href="#contact">{t("Demander une démo")}</a>
 </section>
+
+<script>
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  document.querySelectorAll<HTMLDetailsElement>('#questions details').forEach(details => {
+    const summary = details.querySelector('summary');
+    if (!summary) return;
+    let animation: Animation | null = null;
+    let expanded = details.open;
+
+    summary.addEventListener('click', event => {
+      if (reducedMotion.matches) return;
+      event.preventDefault();
+      const startHeight = details.getBoundingClientRect().height;
+      animation?.cancel();
+      expanded = !expanded;
+      details.open = true;
+      const styles = getComputedStyle(details);
+      const collapsedHeight = summary.getBoundingClientRect().height
+        + parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom)
+        + parseFloat(styles.borderTopWidth) + parseFloat(styles.borderBottomWidth);
+      const endHeight = expanded ? details.getBoundingClientRect().height : collapsedHeight;
+      details.style.overflow = 'hidden';
+      animation = details.animate(
+        { height: [`${startHeight}px`, `${endHeight}px`] },
+        { duration: 280, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+      );
+      animation.onfinish = () => {
+        details.open = expanded;
+        details.style.removeProperty('overflow');
+        animation = null;
+      };
+    });
+    details.addEventListener('toggle', () => {
+      if (!animation) expanded = details.open;
+    });
+  });
+</script>

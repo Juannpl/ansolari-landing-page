@@ -1,9 +1,15 @@
+---
+import { translator, type Locale } from "../lib/i18n";
+interface Props { lang?: Locale; }
+const { lang = "fr" } = Astro.props;
+const t = translator(lang);
+---
 <footer>
       <a class="brand brand-footer" href="#top">
         <img class="brand-logo" src="/images/logo.svg" alt="" width="55" height="46" />
         <span>Ansolari</span>
       </a>
-      <p>Agent vocal IA conçu pour les garages automobiles.</p>
-      <p class="footer-contact">Projet porté par Juan-Pablo LONDONO RAMIREZ<br /><a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a></p>
+      <p>{t("Agent vocal IA conçu pour les garages automobiles.")}</p>
+      <p class="footer-contact">{t("Projet porté par Juan-Pablo LONDONO RAMIREZ")}<br /><a href="mailto:contact@ansolari.fr">contact@ansolari.fr</a></p>
       <span>© {new Date().getFullYear()} Ansolari</span>
     </footer>

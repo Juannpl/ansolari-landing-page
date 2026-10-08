@@ -194,3 +194,64 @@ test('FAQ works with the keyboard and CAPTCHA loads only after six digits', asyn
   await expect(page.getByRole('button', { name: 'Valider le CAPTCHA de test' })).toBeVisible();
   expect(googleRequests).toHaveLength(1);
 });
+
+test('English landing, language switch, simulation and verified request', async ({ page }) => {
+  let otpCode = '';
+  const payloads: Record<string, any>[] = [];
+  await page.route('https://api.emailjs.com/api/v1.0/email/send', async route => {
+    const payload = route.request().postDataJSON();
+    payloads.push(payload);
+    if (payload.template_params.otp_code) otpCode = payload.template_params.otp_code;
+    await route.fulfill({ status: 200, body: 'OK' });
+  });
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Langue' }).getByRole('link', { name: 'EN' }).click();
+  await expect(page).toHaveURL(/\/en\/$/);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Don’t let a missed call become a lost customer.');
+  await expect(page).toHaveTitle('AI phone assistant for auto repair shops | Ansolari');
+  await page.getByRole('link', { name: 'Try a simulated call' }).click();
+  await page.getByRole('button', { name: 'Answer with Ansolari' }).click();
+  await page.getByRole('button', { name: 'Book a service', exact: true }).click();
+  await page.getByRole('button', { name: 'Tomorrow · 10:30 am' }).click();
+  await expect(page.getByText('Simulation complete')).toBeVisible();
+  await expect(page.locator('.result-card')).toContainText('Annual service');
+  await expect(page.locator('.transcript')).toContainText('You’re booked for tomorrow');
+  await page.getByRole('link', { name: 'Tailor this demo to my workshop' }).click();
+  await page.getByLabel('Workshop name').fill('Test Workshop');
+  await page.getByLabel('First name').fill('Sam');
+  await page.getByLabel('Work email').fill('sam@example.com');
+  await page.getByRole('combobox', { name: 'Main need' }).click();
+  await page.getByRole('option', { name: 'Answer missed calls' }).click();
+  await page.getByRole('button', { name: 'Send my request' }).click();
+  await expect(page.getByText('A code has been sent to sam@example.com.')).toBeVisible();
+  await page.getByLabel('Verification code').fill(otpCode);
+  await page.getByRole('button', { name: 'Valider le CAPTCHA de test' }).click();
+  await page.getByRole('button', { name: 'Confirm and send' }).click();
+  await expect(page.getByText('Your request has been sent.')).toBeVisible();
+  expect(payloads[1].template_params.need).toBe('Answer missed calls');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `/tmp/ansolari-en-${test.info().project.name}.png`, fullPage: true });
+  await page.getByRole('navigation', { name: 'Language' }).getByRole('link', { name: 'FR' }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+});
+
+test('FAQ animates both ways and handles rapid toggles and reduced motion', async ({ page }) => {
+  await page.goto('/');
+  const card = page.locator('#questions details').first();
+  const summary = card.locator('summary');
+  await summary.click();
+  await expect(card).toHaveAttribute('open', '');
+  await page.waitForTimeout(350);
+  const expandedHeight = await card.evaluate(element => element.getBoundingClientRect().height);
+  await summary.press('Enter');
+  await expect(card).not.toHaveAttribute('open', '');
+  expect(await card.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight);
+  await summary.evaluate(element => { (element as HTMLElement).click(); (element as HTMLElement).click(); (element as HTMLElement).click(); });
+  await page.waitForTimeout(350);
+  await expect(card).toHaveAttribute('open', '');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await summary.press('Enter');
+  await expect(card).not.toHaveAttribute('open', '');
+  expect(await card.evaluate(element => element.getAnimations().length)).toBe(0);
+});

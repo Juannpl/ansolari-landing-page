@@ -58,7 +58,6 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
   align-items: center;
 }
 .eyebrow { display: flex; align-items: center; gap: 9px; color: #735b42; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.eyebrow > span { width: 20px; height: 2px; background: var(--brand-orange); }
 h1, h2 { margin: 0; font-weight: 680; letter-spacing: -.055em; line-height: .98; }
 h1 { max-width: 720px; margin-top: 22px; font-size: clamp(52px, 6vw, 84px); }
 .hero-lead { max-width: 620px; margin: 28px 0 0; color: var(--ink-soft); font-size: clamp(18px, 2vw, 21px); line-height: 1.55; }
@@ -359,3 +358,33 @@ footer { flex-wrap: wrap; padding-block: 24px; }
 
 .service-nav { margin-left: auto; font-size: 12px; }
 @media (max-width: 620px) { .service-nav { display: none; } }
+
+.language-switch { display: flex; align-items: center; gap: 4px; flex-shrink: 0; font-size: 12px; font-weight: 750; }
+.language-switch a { padding: 8px; border-radius: 8px; color: var(--ink-soft); }
+.language-switch a[aria-current="page"] { color: var(--ink); background: var(--brand-gold); }
+.language-switch a:hover { background: var(--paper-warm); }
+.site-header { gap: 16px; }
+@media (max-width: 620px) {
+  .site-header { gap: 8px; }
+  .language-switch { margin-left: auto; gap: 0; font-size: 11px; }
+  .language-switch a { padding: 7px 5px; }
+  .header-cta { padding-inline: 10px; font-size: 11px; }
+}
+
+/* Gentle feedback for language links and question cards. */
+.language-switch a {
+  transition: background-color .22s ease, color .22s ease, transform .22s ease, box-shadow .22s ease;
+}
+.language-switch a:hover, .language-switch a:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(73,53,34,.08);
+}
+.language-switch a:active { transform: translateY(0) scale(.96); }
+.faq-list details { transition: border-color .25s ease, background-color .25s ease; }
+.faq-list details:hover, .faq-list details[open] { border-color: #b99869; }
+.faq-list details[open] { background: #f8edda; }
+.faq-list summary { transition: color .2s ease; }
+.faq-list summary:hover { color: #735b42; }
+@media (prefers-reduced-motion: reduce) {
+  .language-switch a:hover, .language-switch a:focus-visible, .language-switch a:active { transform: none; }
+}

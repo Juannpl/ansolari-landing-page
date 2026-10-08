@@ -1,13 +1,17 @@
 ---
 import "../styles/global.css";
 import { getSiteUrl } from "../lib/site";
+import { translator, type Locale } from "../lib/i18n";
 interface Props {
+  lang?: Locale;
   title?: string;
   description?: string;
 }
+const { lang = "fr" } = Astro.props;
+const t = translator(lang);
 const {
-  title = "Assistant téléphonique IA pour garages automobiles | Ansolari",
-  description = "Découvrez Ansolari, un assistant téléphonique pour les garages : qualification des demandes, parcours de rendez-vous et démonstration personnalisée.",
+  title = lang === "en" ? "AI phone assistant for auto repair shops | Ansolari" : "Assistant téléphonique IA pour garages automobiles | Ansolari",
+  description = lang === "en" ? "Discover Ansolari, an AI phone assistant for auto repair shops: qualified requests, appointment booking journeys and a personalised demo." : "Découvrez Ansolari, un assistant téléphonique pour les garages : qualification des demandes, parcours de rendez-vous et démonstration personnalisée.",
 } = Astro.props;
 const site = getSiteUrl();
 const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
@@ -17,14 +21,14 @@ const structuredData = site && canonical ? {
   '@graph': [
     { '@type': 'Person', '@id': `${site.href}#publisher`, name: 'Juan-Pablo LONDONO RAMIREZ', url: site.href },
     { '@type': 'Brand', '@id': `${site.href}#ansolari`, name: 'Ansolari', url: site.href, logo: new URL('/images/logo-color.svg', site).href },
-    { '@type': 'WebSite', '@id': `${site.href}#website`, name: 'Ansolari', url: site.href, inLanguage: 'fr-FR', publisher: { '@id': `${site.href}#publisher` } },
+    { '@type': 'WebSite', '@id': `${site.href}#website`, name: 'Ansolari', url: site.href, inLanguage: ['fr-FR', 'en-GB'], publisher: { '@id': `${site.href}#publisher` } },
     { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: title, description,
-      inLanguage: 'fr-FR', isPartOf: { '@id': `${site.href}#website` }, about: { '@id': `${site.href}#ansolari` } },
+      inLanguage: lang === 'en' ? 'en-GB' : 'fr-FR', isPartOf: { '@id': `${site.href}#website` }, about: { '@id': `${site.href}#ansolari` } },
   ],
 } : undefined;
 ---
 <!doctype html>
-<html lang="fr">
+<html lang={lang}>
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg" />
@@ -34,8 +38,13 @@ const structuredData = site && canonical ? {
   <meta name="theme-color" content="#E99A32" />
   <title>{title}</title>
   {canonical && <link rel="canonical" href={canonical} />}
+  {site && <>
+    <link rel="alternate" hreflang="fr" href={new URL('/', site).href} />
+    <link rel="alternate" hreflang="en" href={new URL('/en/', site).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL('/', site).href} />
+  </>}
   <meta property="og:type" content="website" />
-  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:locale" content={lang === "en" ? "en_GB" : "fr_FR"} />
   <meta property="og:site_name" content="Ansolari" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
@@ -44,7 +53,7 @@ const structuredData = site && canonical ? {
     <meta property="og:image" content={socialImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Ansolari — Un accueil téléphonique adapté à votre garage" />
+    <meta property="og:image:alt" content={t("Ansolari : Un accueil téléphonique adapté à votre garage")} />
   </>}
   {structuredData && <script type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\u003c')} />}
   <meta name="twitter:card" content={socialImage ? 'summary_large_image' : 'summary'} />
@@ -53,7 +62,7 @@ const structuredData = site && canonical ? {
   {socialImage && <meta name="twitter:image" content={socialImage} />}
 </head>
 <body>
-  <a class="skip-link" href="#main">Aller au contenu</a>
+  <a class="skip-link" href="#main">{t("Aller au contenu")}</a>
   <slot />
 </body>
 </html>

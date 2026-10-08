@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteHeader from './SiteHeader.astro';
+import Hero from './Hero.astro';
+import ServiceOverview from './ServiceOverview.astro';
+import Demo from './Demo.astro';
+import FAQ from './FAQ.astro';
+import Contact from './Contact.astro';
+import SiteFooter from './SiteFooter.astro';
+interface Props { lang?: "fr" | "en"; }
+const { lang = "fr" } = Astro.props;
+---
+<Layout lang={lang}>
+  <SiteHeader lang={lang} />
+  <main id="main">
+    <Hero lang={lang} />
+    <ServiceOverview lang={lang} />
+    <Demo lang={lang} />
+    <FAQ lang={lang} />
+    <Contact lang={lang} />
+  </main>
+  <SiteFooter lang={lang} />
+</Layout>
